@@ -3,9 +3,9 @@ advent_of_code::solution!(1);
 use regex::Regex;
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let lines = input.split("\n");
+    let lines = input.split('\n');
     let non_empty_lines = lines.filter(|line| !line.is_empty());
-    let digits = non_empty_lines.map(|line| digits(line));
+    let digits = non_empty_lines.map(digits);
     let values = digits.map(|(first, last)| first * 10u32 + last);
     values.reduce(|acc, e| acc + e)
 }
@@ -30,7 +30,7 @@ pub fn part_two(_input: &str) -> Option<u32> {
         Regex::new(r"(\d|one|two|three|four|five|six|seven|eight|nine|zero).*?").unwrap();
     let last_digit_regex =
         Regex::new(r".*(\d|one|two|three|four|five|six|seven|eight|nine|zero)").unwrap();
-    let lines = _input.split("\n");
+    let lines = _input.split('\n');
     let non_empty_lines = lines.filter(|line| !line.is_empty());
     let digits = non_empty_lines.map(|line| {
         (
