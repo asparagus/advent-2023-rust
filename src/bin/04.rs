@@ -16,7 +16,9 @@ pub fn part_one(input: &str) -> Option<u32> {
             cap.name("numbers_you_have").unwrap().as_str(),
         )
     });
-    num_winners.map(score_num_winners).reduce(|acc, e| (acc + e))
+    num_winners
+        .map(score_num_winners)
+        .reduce(|acc, e| (acc + e))
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
@@ -34,8 +36,11 @@ pub fn part_two(input: &str) -> Option<u32> {
     });
     let all_num_winners: Vec<u32> = num_winners.collect();
     let mut repeats: Vec<u32> = vec![1; all_num_winners.len()];
-    for (idx, winners) in (&all_num_winners).into_iter().enumerate() {
-        let top_cap: usize = std::cmp::min(idx + 1 + usize::try_from(*winners).unwrap(), all_num_winners.len());
+    for (idx, winners) in (&all_num_winners).iter().enumerate() {
+        let top_cap: usize = std::cmp::min(
+            idx + 1 + usize::try_from(*winners).unwrap(),
+            all_num_winners.len(),
+        );
         for other_idx in (idx + 1)..top_cap {
             repeats[other_idx] += repeats[idx];
         }
