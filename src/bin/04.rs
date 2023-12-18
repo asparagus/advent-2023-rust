@@ -36,7 +36,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     });
     let all_num_winners: Vec<u32> = num_winners.collect();
     let mut repeats: Vec<u32> = vec![1; all_num_winners.len()];
-    for (idx, winners) in (&all_num_winners).iter().enumerate() {
+    for (idx, winners) in all_num_winners.iter().enumerate() {
         let top_cap: usize = std::cmp::min(
             idx + 1 + usize::try_from(*winners).unwrap(),
             all_num_winners.len(),
