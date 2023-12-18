@@ -1,8 +1,21 @@
 advent_of_code::solution!(5);
 
 use regex::Regex;
+use std::str::FromStr;
+struct MappingSlice {
+    index_from: u32,
+    index_to: u32,
+    len: u32,
+}
 
-fn parse(input: &str) -> (Vec<u32>, Vec<Vec<(u32, u32, u32)>>) {
+fn retrieve_unwrap_parse<T: FromStr>(captures: &regex::Captures, name: &str) -> T
+where
+    <T as FromStr>::Err: std::fmt::Debug,
+{
+    captures.name(name).unwrap().as_str().parse::<T>().unwrap()
+}
+
+fn parse(input: &str) -> (Vec<u32>, Vec<Vec<MappingSlice>>) {
     let seeds_regex = Regex::new(r"seeds: .*\n").unwrap();
     let map_regex =
         Regex::new(r"(?<map_declaration>\S+ map:)\n(?<map_elements>(?:\d+ \d+ \d+\n)+)").unwrap();
@@ -18,21 +31,17 @@ fn parse(input: &str) -> (Vec<u32>, Vec<Vec<(u32, u32, u32)>>) {
     let map_info = map_regex
         .captures_iter(input)
         .map(|m| m.name("map_elements").unwrap().as_str());
-    let maps: Vec<Vec<(u32, u32, u32)>> = map_info
+    let maps: Vec<Vec<MappingSlice>> = map_info
         .map(|m| {
             m.trim()
                 .split('\n')
                 .map(|s| {
                     let cap = map_numbers_regex.captures(s).unwrap();
-                    (
-                        cap.name("idx_to").unwrap().as_str().parse::<u32>().unwrap(),
-                        cap.name("idx_from")
-                            .unwrap()
-                            .as_str()
-                            .parse::<u32>()
-                            .unwrap(),
-                        cap.name("len").unwrap().as_str().parse::<u32>().unwrap(),
-                    )
+                    MappingSlice {
+                        index_from: retrieve_unwrap_parse::<u32>(&cap, "idx_from"),
+                        index_to: retrieve_unwrap_parse::<u32>(&cap, "idx_to"),
+                        len: retrieve_unwrap_parse::<u32>(&cap, "len"),
+                    }
                 })
                 .collect()
         })
@@ -40,15 +49,20 @@ fn parse(input: &str) -> (Vec<u32>, Vec<Vec<(u32, u32, u32)>>) {
     (seeds, maps)
 }
 
-fn apply_mapping(current: u32, mapping: &Vec<(u32, u32, u32)>) -> u32 {
+fn try_apply_mapping_slice(current: u32, mapping_slice: &MappingSlice) -> Option<u32> {
+    let start = mapping_slice.index_from;
+    let end = start.checked_add(mapping_slice.len - 1).unwrap_or(u32::MAX);
+    let range = start..=end;
+    match range.contains(&current) {
+        true => Some(current - mapping_slice.index_from + mapping_slice.index_to),
+        _ => None,
+    }
+}
+
+fn apply_mapping(current: u32, mapping: &[MappingSlice]) -> u32 {
     let retrieved_result = mapping
         .iter()
-        .filter_map(|(idx_to, idx_from, len)| {
-            match (*idx_from..(*idx_from + *len)).contains(&current) {
-                true => Some(idx_to + (current - idx_from)),
-                false => None,
-            }
-        })
+        .filter_map(|mapping_slice| try_apply_mapping_slice(current, mapping_slice))
         .next();
     retrieved_result.unwrap_or(current)
 }
@@ -58,7 +72,11 @@ pub fn part_one(input: &str) -> Option<u32> {
     // mapped_seeds
     seeds
         .iter()
-        .map(|seed| maps.iter().fold(*seed, apply_mapping))
+        .map(|seed| {
+            maps.iter().fold(*seed, |current, mapping| {
+                apply_mapping(current, &mapping[..])
+            })
+        })
         .min()
 }
 
