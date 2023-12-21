@@ -41,12 +41,14 @@ pub fn part_one(input: &str) -> Option<u32> {
                     'R' => right_map.get(current),
                     _ => None,
                 };
-                if next.is_none() {
-                    Done((current, instruction_count))
-                } else if next.is_some_and(|val| val == &&"ZZZ") {
-                    Done((next.unwrap(), instruction_count + 1))
+                if let Some(value) = next {
+                    let return_value: (&&str, usize) = (value, instruction_count + 1);
+                    match value {
+                        &&"ZZZ" => Done(return_value),
+                        _ => Continue(return_value)
+                    }
                 } else {
-                    Continue((next.unwrap(), instruction_count + 1))
+                    Done((current, instruction_count))
                 }
             });
     match loop_until_goal {
