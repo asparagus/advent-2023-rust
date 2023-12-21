@@ -123,11 +123,11 @@ fn apply_range_mapping(ranges: &[Range<u32>], mapping: &[MappingSlice]) -> Vec<R
                     .iter()
                     .flat_map(|remainder_range| {
                         let slice_start = slice.index_from;
-                        let slice_end = slice_start.checked_add(slice.len - 1).unwrap_or(u32::MAX);
+                        let slice_end = slice_start.checked_add(slice.len).unwrap_or(u32::MAX);
                         let beneath: Range<u32> =
                             remainder_range.start..min(slice_start, remainder_range.end - 1);
                         let above: Range<u32> =
-                            (max(slice_end + 1, remainder_range.start))..remainder_range.end;
+                            (max(slice_end, remainder_range.start))..remainder_range.end;
 
                         if !beneath.is_empty() && !above.is_empty() {
                             vec![beneath, above]
