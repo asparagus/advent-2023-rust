@@ -33,12 +33,12 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 fn hand_score(hand: &&str) -> (u32, u32) {
-    let gs = group_score(hand);
+    let gs = type_score(hand);
     let tbs = tie_breaker_score(hand);
     (gs, tbs)
 }
 
-fn group_score(hand: &&str) -> u32 {
+fn type_score(hand: &&str) -> u32 {
     let mut card_counts: HashMap<char, u32> = HashMap::new();
     hand.chars().for_each(|c| {
         card_counts.insert(c, *card_counts.get(&c).unwrap_or(&0) + 1);
