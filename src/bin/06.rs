@@ -60,29 +60,30 @@ pub fn part_one(input: &str) -> Option<u32> {
     let all_results: Vec<u32> = all_times
         .iter()
         .zip(all_distances.iter())
-        .map(|(t, d)| solve(t, d))
+        .map(|(t, d)| solve(&(*t as u64), &(*d as u64)))
+        .map(|x| x as u32)
         .collect();
     let result = all_results.iter().fold(1, |acc, e| acc * e);
     Some(result)
 }
 
-fn quadratic_roots(a: f32, b: f32, c: f32) -> (f32, f32) {
-    let r1 = (-b + (b.powi(2) - 4f32 * a * c).sqrt()) / (2f32 * a);
-    let r2 = (-b - (b.powi(2) - 4f32 * a * c).sqrt()) / (2f32 * a);
+fn quadratic_roots(a: f64, b: f64, c: f64) -> (f64, f64) {
+    let r1 = (-b + (b.powi(2) - 4f64 * a * c).sqrt()) / (2f64 * a);
+    let r2 = (-b - (b.powi(2) - 4f64 * a * c).sqrt()) / (2f64 * a);
     (r1, r2)
 }
 
-fn solve(race_time: &u32, distance_to_beat: &u32) -> u32 {
-    let (r1, r2) = quadratic_roots(-1f32, *race_time as f32, -(*distance_to_beat as f32));
+fn solve(race_time: &u64, distance_to_beat: &u64) -> u64 {
+    let (r1, r2) = quadratic_roots(-1f64, *race_time as f64, -(*distance_to_beat as f64));
     let lower_bound = match r1.fract() {
-        0f32 => r1.ceil() as i32 + 1,
-        _ => r1.ceil() as i32,
+        0f64 => r1.ceil() as i64 + 1,
+        _ => r1.ceil() as i64,
     };
     let upper_bound = match r2.fract() {
-        0f32 => r2.floor() as i32 - 1,
-        _ => r2.floor() as i32,
+        0f64 => r2.floor() as i64 - 1,
+        _ => r2.floor() as i64,
     };
-    (upper_bound - lower_bound + 1) as u32
+    (upper_bound - lower_bound + 1) as u64
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
@@ -100,10 +101,10 @@ pub fn part_two(input: &str) -> Option<u32> {
         .map(|m| m.as_str())
         .collect();
 
-    let actual_time = all_times.join("").parse::<u32>().unwrap();
-    let actual_distance_to_beat = all_distances.join("").parse::<u32>().unwrap();
+    let actual_time = all_times.join("").parse::<u64>().unwrap();
+    let actual_distance_to_beat = all_distances.join("").parse::<u64>().unwrap();
     let result = solve(&actual_time, &actual_distance_to_beat);
-    Some(result)
+    Some(result as u32)
 }
 
 #[cfg(test)]
