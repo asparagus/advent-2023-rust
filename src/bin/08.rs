@@ -45,7 +45,7 @@ pub fn part_one(input: &str) -> Option<u32> {
                     let return_value: (&&str, usize) = (value, instruction_count + 1);
                     match value {
                         &&"ZZZ" => Done(return_value),
-                        _ => Continue(return_value)
+                        _ => Continue(return_value),
                     }
                 } else {
                     Done((current, instruction_count))
@@ -58,7 +58,57 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let instructions_re = Regex::new(r"^[LR]+").unwrap();
+    let instructions = instructions_re.find(input).unwrap().as_str();
+    let nodes_re = Regex::new(r"(?<from>\w{3}) = \((?<L>\w{3}), (?<R>\w{3})\)").unwrap();
+    let nodes: Vec<(&str, &str, &str)> = nodes_re
+        .captures_iter(input)
+        .map(|c| {
+            (
+                c.name("from").unwrap().as_str(),
+                c.name("L").unwrap().as_str(),
+                c.name("R").unwrap().as_str(),
+            )
+        })
+        .collect();
+    let left_map: HashMap<&&str, &&str> = nodes
+        .iter()
+        .map(|(from, left, _right)| (from, left))
+        .collect();
+    let right_map: HashMap<&&str, &&str> = nodes
+        .iter()
+        .map(|(from, _left, right)| (from, right))
+        .collect();
+    let instruction_loop = instructions.chars().cycle();
+
+    let nodes_for_start: Vec<&&str> = nodes
+        .iter()
+        .map(|(from, _left, _right)| from)
+        .filter(|node| node.ends_with('A'))
+        .collect();
+    let start: (Vec<&&&str>, usize) = (nodes_for_start.iter().map(|node| node).collect(), 0);
+    let loop_until_goal =
+        instruction_loop
+            .enumerate()
+            .fold_while(start, |acc, instruction| {
+                let (instruction_count, instruction_char) = instruction;
+                let (current, _) = acc;
+                let map = match instruction_char {
+                    'L' => left_map,
+                    _ => right_map,
+                };
+                let next = current.iter().map(|node| map.get(&node).unwrap()).collect_vec();
+                let return_value: (Vec<&&&str>, usize) = (next, instruction_count + 1);
+                if next.iter().all(|node| node.ends_with('Z')) {
+                    Done(return_value)
+                } else {
+                    Continue(return_value)
+                }
+            });
+    match loop_until_goal {
+        Done((_, count)) => Some(count as u32),
+        _ => None,
+    }
 }
 
 #[cfg(test)]
