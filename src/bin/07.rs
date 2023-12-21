@@ -57,11 +57,11 @@ fn type_score(hand: &&str) -> u32 {
 
 fn tie_breaker_score(hand: &&str) -> u32 {
     const POWERS: [u32; 5] = [
-        38416, // 14^4
-        2744,  // 14^3
-        196,   // 14^2
-        14,    // 14^1
-        1,     // 14^0
+        50625, // 15^4
+        3375,  // 15^3
+        225,   // 15^2
+        15,    // 15^1
+        1,     // 15^0
     ];
 
     hand.char_indices()
@@ -75,6 +75,7 @@ fn card_score(card: char) -> u32 {
         'J' => 11,
         'Q' => 12,
         'K' => 13,
+        'A' => 14,
         c => c.to_digit(10).unwrap_or_default(),
     }
 }
