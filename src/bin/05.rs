@@ -101,47 +101,46 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mapped_seeds: Vec<Range<u32>> = seed_ranges
         .iter()
         .flat_map(|seed_range| {
-            maps.iter()
-                .fold(vec![seed_range.start..seed_range.end], |ranges, mapping| {
-                    apply_range_mapping(&ranges, &mapping[..])
-                })
+            #[allow(clippy::single_range_in_vec_init)]
+            let start = vec![seed_range.start..seed_range.end];
+            maps.iter().fold(start, |ranges, mapping| {
+                apply_range_mapping(&ranges, mapping)
+            })
         })
         .collect();
     let min = mapped_seeds.iter().map(|range| range.start).min();
     min
 }
 
-fn apply_range_mapping(ranges: &Vec<Range<u32>>, mapping: &[MappingSlice]) -> Vec<Range<u32>> {
+fn apply_range_mapping(ranges: &[Range<u32>], mapping: &[MappingSlice]) -> Vec<Range<u32>> {
     ranges
         .iter()
         .flat_map(|range| {
-            let mut leftovers =
-                mapping
+            #[allow(clippy::single_range_in_vec_init)]
+            let start = vec![range.start..range.end];
+            let mut leftovers = mapping.iter().fold(start, |remainder, slice| {
+                remainder
                     .iter()
-                    .fold(vec![range.start..range.end], |remainder, slice| {
-                        remainder
-                            .iter()
-                            .flat_map(|remainder_range| {
-                                let slice_start = slice.index_from;
-                                let slice_end =
-                                    slice_start.checked_add(slice.len - 1).unwrap_or(u32::MAX);
-                                let beneath: Range<u32> = remainder_range.start
-                                    ..min(slice_start, remainder_range.end - 1);
-                                let above: Range<u32> = (max(slice_end + 1, remainder_range.start))
-                                    ..remainder_range.end;
+                    .flat_map(|remainder_range| {
+                        let slice_start = slice.index_from;
+                        let slice_end = slice_start.checked_add(slice.len - 1).unwrap_or(u32::MAX);
+                        let beneath: Range<u32> =
+                            remainder_range.start..min(slice_start, remainder_range.end - 1);
+                        let above: Range<u32> =
+                            (max(slice_end + 1, remainder_range.start))..remainder_range.end;
 
-                                if !beneath.is_empty() && !above.is_empty() {
-                                    vec![beneath, above]
-                                } else if !beneath.is_empty() {
-                                    vec![beneath]
-                                } else if !above.is_empty() {
-                                    vec![above]
-                                } else {
-                                    vec![]
-                                }
-                            })
-                            .collect()
-                    });
+                        if !beneath.is_empty() && !above.is_empty() {
+                            vec![beneath, above]
+                        } else if !beneath.is_empty() {
+                            vec![beneath]
+                        } else if !above.is_empty() {
+                            vec![above]
+                        } else {
+                            vec![]
+                        }
+                    })
+                    .collect()
+            });
             let mut mapped: Vec<Range<u32>> = mapping
                 .iter()
                 .filter_map(|slice| {
@@ -151,17 +150,15 @@ fn apply_range_mapping(ranges: &Vec<Range<u32>>, mapping: &[MappingSlice]) -> Ve
                         max(slice_start, range.start)..min(slice_end, range.end);
                     if intersection.is_empty() {
                         None
+                    } else if slice.index_to >= slice.index_from {
+                        let offset = slice.index_to - slice.index_from;
+                        Some((offset + intersection.start)..(offset + intersection.end))
                     } else {
-                        if slice.index_to >= slice.index_from {
-                            let offset = slice.index_to - slice.index_from;
-                            Some((offset + intersection.start)..(offset + intersection.end))
-                        } else {
-                            let negative_offset = slice.index_from - slice.index_to;
-                            Some(
-                                (intersection.start - negative_offset)
-                                    ..(intersection.end - negative_offset),
-                            )
-                        }
+                        let negative_offset = slice.index_from - slice.index_to;
+                        Some(
+                            (intersection.start - negative_offset)
+                                ..(intersection.end - negative_offset),
+                        )
                     }
                 })
                 .collect();
