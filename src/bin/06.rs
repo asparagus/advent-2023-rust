@@ -86,7 +86,24 @@ fn solve(race_time: &u32, distance_to_beat: &u32) -> u32 {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let time_regex = Regex::new(r"Time:\s*(?:\d+\s+)+").unwrap();
+    let distance_regex = Regex::new(r"Distance:\s*(?:\d+\s+)+").unwrap();
+    let number_regex = Regex::new(r"\d+").unwrap();
+    let time_line = time_regex.find(input).unwrap().as_str();
+    let distance_line = distance_regex.find(input).unwrap().as_str();
+    let all_times: Vec<&str> = number_regex
+        .find_iter(time_line)
+        .map(|m| m.as_str())
+        .collect();
+    let all_distances: Vec<&str> = number_regex
+        .find_iter(distance_line)
+        .map(|m| m.as_str())
+        .collect();
+
+    let actual_time = all_times.join("").parse::<u32>().unwrap();
+    let actual_distance_to_beat = all_distances.join("").parse::<u32>().unwrap();
+    let result = solve(&actual_time, &actual_distance_to_beat);
+    Some(result)
 }
 
 #[cfg(test)]
@@ -102,6 +119,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(71503));
     }
 }
