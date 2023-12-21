@@ -63,7 +63,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         .map(|(t, d)| solve(&(*t as u64), &(*d as u64)))
         .map(|x| x as u32)
         .collect();
-    let result = all_results.iter().fold(1, |acc, e| acc * e);
+    let result = all_results.iter().product::<u32>();
     Some(result)
 }
 
@@ -76,11 +76,11 @@ fn quadratic_roots(a: f64, b: f64, c: f64) -> (f64, f64) {
 fn solve(race_time: &u64, distance_to_beat: &u64) -> u64 {
     let (r1, r2) = quadratic_roots(-1f64, *race_time as f64, -(*distance_to_beat as f64));
     let lower_bound = match r1.fract() {
-        0f64 => r1.ceil() as i64 + 1,
+        x if x == 0f64 => r1.ceil() as i64 + 1,
         _ => r1.ceil() as i64,
     };
     let upper_bound = match r2.fract() {
-        0f64 => r2.floor() as i64 - 1,
+        x if x == 0f64 => r2.floor() as i64 - 1,
         _ => r2.floor() as i64,
     };
     (upper_bound - lower_bound + 1) as u64
