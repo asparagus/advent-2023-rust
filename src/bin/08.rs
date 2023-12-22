@@ -132,7 +132,16 @@ pub fn part_two(input: &str) -> Option<u32> {
             })
             .collect();
     }
+    /*
+    This code is actually not efficient enough to reach the answer.
+    I feel like there might not be a generic way to efficiently solve this,
+    but by checking the generated short_map we can generate the graph and
+    observe the solution can easily be computed with the Least common multiple.
 
+    All paths from Ak -> Zk have a corresponding Zk -> Zk loop.
+    Both are always the same length.
+    The LCM between the corresponding lengths for each starting node yields the answer.
+     */
     Some(step as u32)
 }
 
