@@ -116,7 +116,9 @@ pub fn part_two(input: &str) -> Option<u32> {
             .unzip();
         let min_step = *candidate_steps.iter().min().unwrap();
         step = min_step;
-        if candidate_steps.iter().all_equal() && candidate_nodes.iter().all(|node| node.ends_with('Z')) {
+        if candidate_steps.iter().all_equal()
+            && candidate_nodes.iter().all(|node| node.ends_with('Z'))
+        {
             break;
         }
         current = current
