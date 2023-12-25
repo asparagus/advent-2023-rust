@@ -119,7 +119,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(area)
 }
 
-fn infer_start_tile(tiles: &Vec<Vec<char>>, start: (usize, usize)) -> char {
+fn infer_start_tile(tiles: &[Vec<char>], start: (usize, usize)) -> char {
     let neighbors = expand(&'S', start);
     let matches: ((usize, usize), (usize, usize)) = neighbors
         .iter()
@@ -132,19 +132,17 @@ fn infer_start_tile(tiles: &Vec<Vec<char>>, start: (usize, usize)) -> char {
         .map(|(_tile, candidate)| candidate)
         .collect_tuple()
         .unwrap();
-    let possibilities = vec!['|', '-', 'L', 'J', '7', 'F'];
-    possibilities
+    let possibilities = ['|', '-', 'L', 'J', '7', 'F'];
+    *possibilities
         .iter()
-        .filter(|&tile| {
+        .find(|&tile| {
             let expansions_to_compare = expand(tile, start);
             expansions_to_compare.len() == 2
                 && expansions_to_compare
                     .iter()
                     .all(|&n| n == matches.0 || n == matches.1)
         })
-        .next()
         .unwrap()
-        .clone()
 }
 
 enum BoundaryStatus {
@@ -156,7 +154,7 @@ enum BoundaryStatus {
     ExitFromBelow,
 }
 
-fn count_area(tiles: &Vec<Vec<char>>, loop_nodes: &HashSet<(usize, usize)>) -> u32 {
+fn count_area(tiles: &[Vec<char>], loop_nodes: &HashSet<(usize, usize)>) -> u32 {
     tiles
         .iter()
         .enumerate()
@@ -224,7 +222,7 @@ fn identify_loop(tiles: &Vec<Vec<char>>, start: (usize, usize)) -> HashSet<(usiz
     let mut seen: HashSet<(usize, usize)> = HashSet::new();
     seen.insert(start);
 
-    let mut current_nodes: Vec<(u32, (usize, usize))> = vec![];
+    let mut current_nodes: Vec<(u32, (usize, usize))>;
     let mut next_nodes = vec![(0, start)];
     while !next_nodes.is_empty() {
         current_nodes = next_nodes;
